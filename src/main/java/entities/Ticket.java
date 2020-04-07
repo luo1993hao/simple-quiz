@@ -2,6 +2,7 @@ package entities;
 
 import com.google.common.base.Splitter;
 import exception.InvalidTicketException;
+import preparedstatement.crud.PreparedStatementQuery;
 import preparedstatement.crud.PreparedStatementUpdate;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public class Ticket {
     private String carNumber;
     private String carparkId;
 
-    public Ticket(int spotNumber, String carNumber, String carparkId) {
+    Ticket(int spotNumber, String carNumber, String carparkId) {
         this.spotNumber = spotNumber;
         this.carNumber = carNumber;
         this.carparkId = carparkId;
@@ -32,14 +33,15 @@ public class Ticket {
         return carparkId;
     }
 
-    void save() {
-        String insertSql = "INSERT INTO ticket (spot_number, car_number, carpark_id) VALUES (?, ?, ?)";
-        PreparedStatementUpdate.update(insertSql, this.spotNumber, this.carNumber, this.carparkId);
-    }
 
     public void delete() {
         String deleteSql = "DELETE FROM ticket WHERE car_number = ?";
         PreparedStatementUpdate.update(deleteSql, this.carNumber);
+    }
+
+    public Ticket findByCarNumber() {
+        String sql = "SELECT carpark_id carparkId, spot_number spotNumber, car_number carNumber FROM ticket WHERE car_number = ?";
+        return PreparedStatementQuery.queryInfo(Ticket.class, sql, this.carNumber);
     }
 
     public static Ticket parseTicket(String ticketString) {
@@ -50,6 +52,11 @@ public class Ticket {
             throw new InvalidTicketException("invalid input ticket");
         }
         return new Ticket(Integer.parseInt(ticketFieldList.get(1)), ticketFieldList.get(2), ticketFieldList.get(0));
+    }
+
+    void save() {
+        String insertSql = "INSERT INTO ticket (spot_number, car_number, carpark_id) VALUES (?, ?, ?)";
+        PreparedStatementUpdate.update(insertSql, this.spotNumber, this.carNumber, this.carparkId);
     }
 
     @Override

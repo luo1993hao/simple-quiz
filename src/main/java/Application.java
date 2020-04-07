@@ -2,7 +2,6 @@ import entities.Carpark;
 import entities.Manager;
 import entities.Ticket;
 import exception.InvalidTicketException;
-import preparedstatement.crud.PreparedStatementQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +57,7 @@ public class Application {
     }
 
     public static String park(String carNumber) {
-        String sql = "SELECT * FROM carpark";
-        List<Carpark> list = PreparedStatementQuery.queryInfoList(Carpark.class, sql);
-        Manager manager = new Manager(list);
+        Manager manager = new Manager(Carpark.findAll());
         Ticket ticket = manager.managePark(carNumber);
         return ticket.toString();
     }
@@ -78,8 +75,7 @@ public class Application {
 
     private static void checkTicket(Ticket ticket) {
         //query
-        String sql = "SELECT carpark_id carparkId, spot_number spotNumber, car_number carNumber FROM ticket WHERE car_number = ?";
-        if (Objects.isNull(PreparedStatementQuery.queryInfo(Ticket.class, sql, ticket.getCarNumber()))) {
+        if (Objects.isNull(ticket.findByCarNumber())) {
             throw new InvalidTicketException("invalid  ticket");
         }
     }

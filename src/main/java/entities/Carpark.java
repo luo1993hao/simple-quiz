@@ -49,12 +49,21 @@ public class Carpark {
         return PreparedStatementQuery.queryInfo(Carpark.class, querySql, id);
     }
 
+    public static List<Carpark> findAll() {
+        String sql = "SELECT * FROM carpark";
+        return PreparedStatementQuery.queryInfoList(Carpark.class, sql);
 
-    Boolean isAvailable() {
-        return this.spotNumber.length() > 0;
     }
 
-    public Ticket park(String carNumber, String spotNumber) {
+
+    public void updateSpotNumber(Integer spotNumber) {
+        List<String> spotNumberList = new ArrayList<>(Splitter.on(",")
+                .trimResults().splitToList(this.spotNumber));
+        spotNumberList.add(String.valueOf(spotNumber));
+        this.spotNumber = Joiner.on(",").join(spotNumberList);
+    }
+
+    Ticket park(String carNumber, String spotNumber) {
         //find minspot
         int minSpot = this.findMinSpotNumber(spotNumber);
         //remove minSpot
@@ -65,6 +74,10 @@ public class Carpark {
         Ticket ticket = new Ticket(minSpot, carNumber, this.id);
         ticket.save();
         return ticket;
+    }
+
+    Boolean isAvailable() {
+        return this.spotNumber.length() > 0;
     }
 
     private int findMinSpotNumber(String spotNumber) {
@@ -104,10 +117,4 @@ public class Carpark {
     }
 
 
-    public void updateSpotNumber(Integer spotNumber) {
-        List<String> spotNumberList = new ArrayList<>(Splitter.on(",")
-                .trimResults().splitToList(this.spotNumber));
-        spotNumberList.add(String.valueOf(spotNumber));
-        this.spotNumber = Joiner.on(",").join(spotNumberList);
-    }
 }
