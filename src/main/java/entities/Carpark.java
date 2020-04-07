@@ -3,6 +3,7 @@ package entities;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import preparedstatement.crud.PreparedStatementQuery;
 import preparedstatement.crud.PreparedStatementUpdate;
 
 import java.util.ArrayList;
@@ -39,9 +40,15 @@ public class Carpark {
     }
 
     public void update() {
-        String sql = "UPDATE carpark SET space = ? WHERE id = ?";
-        PreparedStatementUpdate.update(sql, this.space, this.id);
+        String sql = "UPDATE carpark SET spotNumber = ? WHERE id = ?";
+        PreparedStatementUpdate.update(sql, this.spotNumber, this.id);
     }
+
+    public static Carpark findById(String id) {
+        String querySql = "SELECT space,  spotNumber FROM carpark WHERE id = ?";
+        return PreparedStatementQuery.queryInfo(Carpark.class, querySql, id);
+    }
+
 
     Boolean isAvailable() {
         return this.spotNumber.length() > 0;
@@ -56,7 +63,7 @@ public class Carpark {
         this.updateCarPark(nowSpotNumber);
         //new ticket and return
         Ticket ticket = new Ticket(minSpot, carNumber, this.id);
-        ticket.saveToDb();
+        ticket.save();
         return ticket;
     }
 
@@ -97,4 +104,10 @@ public class Carpark {
     }
 
 
+    public void updateSpotNumber(Integer spotNumber) {
+        List<String> spotNumberList = new ArrayList<>(Splitter.on(",")
+                .trimResults().splitToList(this.spotNumber));
+        spotNumberList.add(String.valueOf(spotNumber));
+        this.spotNumber = Joiner.on(",").join(spotNumberList);
+    }
 }
